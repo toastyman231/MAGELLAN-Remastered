@@ -14,12 +14,15 @@ public class Floater : MonoBehaviour
     public Collider water;
 
     private Vector3 start;
+    private Mesh mesh;
+    private Vector3[] vertices;
 
     // Start is called before the first frame update
     void Start()
     {
         rb = transform.parent.GetComponent<Rigidbody>();
         start = rb.position;
+        mesh = water.gameObject.GetComponent<MeshFilter>().mesh;
     }
 
     // Update is called once per frame
@@ -27,7 +30,10 @@ public class Floater : MonoBehaviour
     {
         rb.AddForceAtPosition(Physics.gravity / floaterCount, transform.position, ForceMode.Acceleration);
 
-        float waveHeight = GetWaterHeight(transform.position.x, transform.position.z);
+        //Debug.Log("Floater pos: " + transform.position);
+        //Debug.Log("Floater local pos: " + transform.localPosition);
+        //float waveHeight = GetWaterHeight(transform.position.x, transform.position.z);
+        float waveHeight = WaveManager.GetWaveHeight(transform.position.x, transform.position.z);
         if (transform.position.y < waveHeight)
         {
             float displacementMultiplier = Mathf.Clamp01((waveHeight - transform.position.y) / depthBeforeSubmerged) * displacementAmount;
@@ -46,8 +52,11 @@ public class Floater : MonoBehaviour
     {
         RaycastHit hit;
         Ray ray = new Ray(new Vector3(_x, 200, _z), Vector3.down);
+        Debug.DrawRay(new Vector3(_x, 200, _z), Vector3.down * 400f, Color.red);
+        Debug.Log("In XZ: " + _x + " " + _z);
         if (water.Raycast(ray, out hit, Mathf.Infinity)) {
-            Debug.Log(hit.transform.position.y);
+            Debug.Log(hit.collider.gameObject.name);
+            Debug.Log(hit.transform.position);
             return hit.transform.position.y;
         } else
         {
