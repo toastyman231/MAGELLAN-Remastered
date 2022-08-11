@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class OceanGeometry : MonoBehaviour
@@ -15,13 +16,15 @@ public class OceanGeometry : MonoBehaviour
     bool showMaterialLods;
 
     [SerializeField]
-    float lengthScale = 10;
+    public float lengthScale = 10;
     [SerializeField, Range(1, 40)]
     int vertexDensity = 30;
     [SerializeField, Range(0, 8)]
     int clipLevels = 8;
     [SerializeField, Range(0, 100)]
     float skirtSize = 50;
+
+    public Vector3 offsetFromCamera = new Vector3(0, 0, 0);
 
     List<Element> rings = new List<Element>();
     List<Element> trims = new List<Element>();
@@ -182,7 +185,7 @@ public class OceanGeometry : MonoBehaviour
     Vector3 OffsetFromCenter(int level, int activeLevels)
     {
         return (Mathf.Pow(2, clipLevels) + GeometricProgressionSum(2, 2, clipLevels - activeLevels + level + 1, clipLevels - 1))
-               * lengthScale / GridSize() * (GridSize() - 1) / 2 * new Vector3(-1, 0, -1);
+               * lengthScale / GridSize() * (GridSize() - 1) / 2 * new Vector3(-1, 0, -1) + offsetFromCamera;
     }
 
     float GeometricProgressionSum(float b0, float q, int n1, int n2)
@@ -396,6 +399,34 @@ public class OceanGeometry : MonoBehaviour
         mesh.triangles = triangles;
         mesh.normals = normals;
         return mesh;
+    }
+
+    public IEnumerator LerpOverTime(Vector3 oldValue, Vector3 target, int steps, float stepTime)
+    {
+        float l = 0;
+
+        for (int i = 0; i < steps; i += 0)
+        {
+            offsetFromCamera = Vector3.Lerp(oldValue, target, l);
+            yield return new WaitForSeconds(stepTime);
+
+            i++;
+            l += (float)i / steps;
+        }
+    }
+
+    public IEnumerator LerpOverTime(float oldValue, float target, int steps, float stepTime)
+    {
+        float l = 0;
+
+        for (int i = 0; i < steps; i += 0)
+        {
+            lengthScale = Mathf.Lerp(oldValue, target, l);
+            yield return new WaitForSeconds(stepTime);
+
+            i++;
+            l += (float)i / steps;
+        }
     }
 
     class Element
