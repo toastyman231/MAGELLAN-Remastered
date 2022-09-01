@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Cinemachine;
 using UnityEngine.Playables;
+using System.Threading.Tasks;
 
 public class DestroyAfterAnimation : MonoBehaviour
 {
@@ -23,14 +24,27 @@ public class DestroyAfterAnimation : MonoBehaviour
             director.Play();
             StartCoroutine(geometry.LerpOverTime(geometry.offsetFromCamera, new Vector3(0, 0, -350), 4, 0.3f));
             StartCoroutine(geometry.LerpOverTime(geometry.lengthScale, 100f, 4, 0.3f));
-            StartCoroutine(DestroyMe());
+            //StartCoroutine(DestroyMe());
+            StartCoroutine(BeginGame());
+            //BeginGame();
+            destroy = false;
         }
     }
 
-    IEnumerator DestroyMe()
+    /*IEnumerator DestroyMe()
     {
         yield return new WaitUntil(() => geometry.offsetFromCamera == new Vector3(0, 0, -350)
                                     && geometry.lengthScale == 100f);
+        Destroy(transform.parent.gameObject);
+    }*/
+
+    IEnumerator BeginGame()
+    {
+        //await Task.Delay(7000);
+        yield return new WaitForSeconds(7f);
+        GameManager.instance.GameStarter();
+        //StartCoroutine(GameManager.instance.StartGame());
+        //await GameManager.instance.StartGame();
         Destroy(transform.parent.gameObject);
     }
 }

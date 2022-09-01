@@ -29,8 +29,11 @@ public class Ship : MonoBehaviour
         rb = GetComponent<Rigidbody>();
         targets = new Vector3[3]
         {
+            //Sailing target
             new Vector3(0, 0, -240),
+            //Docking target
             new Vector3(-200, 0, -240),
+            //Leaving target
             new Vector3(1000, 0, -240)
         };
     }
@@ -51,6 +54,7 @@ public class Ship : MonoBehaviour
                 break;
         }
 
+        //Dock if close to target position
         if((target.position - transform.position).magnitude <= 0.3f)
         {
             shipState = State.DOCKED;
