@@ -1,8 +1,11 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using UI;
 using UnityEngine;
+using UnityEngine.Events;
 
 [RequireComponent(typeof(Animator))]
 public class OceanEvent : MonoBehaviour
@@ -13,7 +16,10 @@ public class OceanEvent : MonoBehaviour
     private readonly int Enter = Animator.StringToHash("Enter");
     private readonly int Exit = Animator.StringToHash("Exit");
 
-    private Animator anim;
+    public string eventName;
+    public string eventDesc;
+
+    public Animator anim;
 
     public Type eventType;
     public Actions[] actionsList;
@@ -35,7 +41,6 @@ public class OceanEvent : MonoBehaviour
     public void InitiateEvent()
     {
         //Ship.instance.shipState = Ship.State.DOCKING;
-
         anim.CrossFade(Enter, 0.0f, 0);
     }
 
@@ -47,5 +52,40 @@ public class OceanEvent : MonoBehaviour
         //Thread.Sleep(10000);
         await Task.Delay(10000);
         Destroy(gameObject);
+    }
+
+    public UnityAction GetAction(Actions action)
+    {
+        switch (action)
+        {
+            case Actions.LEAVE:
+                return () =>
+                {
+                    done = true;
+                    IslandUIController.Instance.LeaveIsland();
+                };
+            case Actions.QUEST:
+                // Return proper function based on current quest
+                return () => Debug.Log("Quest");
+            case Actions.MINIGAME:
+                // Return proper function based on which minigame should play
+                return () => Debug.Log("Minigame");
+            case Actions.TRADE:
+                // Return trade function
+                return () => Debug.Log("Trade");
+            case Actions.CONVERT:
+                // Return convert function
+                return () => Debug.Log("Convert");
+            case Actions.PILLAGE:
+                // Return pillage function
+                return () => Debug.Log("Pillage");
+            default:
+                return () => Debug.Log("Invalid Action type");
+        }
+    }
+
+    public void RunSetup()
+    {
+        IslandUIController.Instance.SetupIsland(this);
     }
 }
