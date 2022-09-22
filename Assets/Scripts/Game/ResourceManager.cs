@@ -1,5 +1,7 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 public class ResourceManager : MonoBehaviour
@@ -8,7 +10,7 @@ public class ResourceManager : MonoBehaviour
     public static ResourceManager instance;
 
     public int storageMax;
-
+    
     private int _crew; 
     private int _crewMax;
 
@@ -16,7 +18,7 @@ public class ResourceManager : MonoBehaviour
 
     private int _food;
     private int _foodMax;
-
+    
     public int crew
     {
         get => _crew;
@@ -67,15 +69,15 @@ public class ResourceManager : MonoBehaviour
         }
 
         crew = 270;
-        food = 18;
+        food = 36;
         gold = 1600;
     }
 
     public void InitializeValues(int pCrew, int pGold, int pFood)
     {
-        crew = pCrew;
+        _crew = pCrew;
         _gold = pGold;
-        food = pFood;
+        _food = pFood;
     }
 
     public void RecalculateMaxes()
@@ -92,6 +94,7 @@ public class ResourceManager : MonoBehaviour
                 if(val <= _crewMax)
                 {
                     crew = val;
+                    _crewMax = Mathf.FloorToInt(_foodMax * 7.5f);
                     return true;
                 }
 
@@ -100,6 +103,7 @@ public class ResourceManager : MonoBehaviour
                 if (val <= _foodMax)
                 {
                     food = val;
+                    _foodMax = storageMax - _crewMax;
                     return true;
                 }
 
@@ -112,7 +116,7 @@ public class ResourceManager : MonoBehaviour
     }
 }
 
-[System.Serializable]
+[Serializable]
 public class Item
 {
     private string _name;

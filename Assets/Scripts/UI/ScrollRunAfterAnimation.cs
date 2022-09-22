@@ -6,6 +6,7 @@ public class ScrollRunAfterAnimation : MonoBehaviour
 {
     public void RunAfterAnimation()
     {
-        GameManager.instance.currentEvent.CloseEvent();
+        if (GameManager.instance.currentEvent.done)
+            GameManager.instance.currentEvent.CloseEvent();
     }
 }

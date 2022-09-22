@@ -22,6 +22,11 @@ public class InitialResourceSetup : MonoBehaviour
 
     public void Done()
     {
+        ResourceManager.instance.InitializeValues(ResourceManager.instance.crewMax, ResourceManager.instance.gold, ResourceManager.instance.food);
+        // Debug.Log("Crew: " + ResourceManager.instance.crew);
+        // Debug.Log("CrewMax: " + ResourceManager.instance.crewMax);
+        // Debug.Log("Food: " + ResourceManager.instance.food);
+        // Debug.Log("FoodMax: " + ResourceManager.instance.foodMax);
         scrollAnim.CrossFade(Furl, 0.0f, 0);
         //Set sail
     }

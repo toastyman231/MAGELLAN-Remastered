@@ -12,11 +12,22 @@ public class GameManager : MonoBehaviour
     public OceanEvent[] landmarks;
     public OceanEvent[] stopEvents;
     public OceanEvent currentEvent;
-    
+
+    // How many stops will proceed each landmark? Each element corresponds to an element in landmarks.
     public int[] stops;
+    public int progress;
 
     //public bool done;
     public bool gameStarted;
+
+    private int _maxDifficulty;
+    private int _currentStop;
+    private int _currentLandmark;
+    public int maxDifficulty
+    {
+        get => _maxDifficulty + (progress * 5) + 1;
+        set => _maxDifficulty = value;
+    }
 
     // Start is called before the first frame update
     void Start()
@@ -30,6 +41,10 @@ public class GameManager : MonoBehaviour
         }
         
         gameStarted = false;
+        _maxDifficulty = 100;
+        //TODO: Load these from player save
+        _currentStop = 0;
+        _currentLandmark = 0;
     }
 
     public IEnumerator StartGame()
@@ -39,14 +54,16 @@ public class GameManager : MonoBehaviour
         OceanEvent stop;
 
         gameStarted = true;
-        for (int i = 0; i < landmarks.Length; i++)
+        for (int i = _currentLandmark; i < landmarks.Length; i++)
         {
-            for(int j = 0; j < stops[i]; j++)
+            for(int j = _currentStop; j < stops[i]; j++)
             {
                 //Choose random stop from list (should override at certain story based stops)
                 stop = Instantiate(stopEvents[Random.Range(0, stopEvents.Length)], new Vector3(0, -400, 0),
                     Quaternion.identity, transform).GetComponent<OceanEvent>();
                 currentEvent = stop;
+                _currentStop = j;
+                progress = _currentLandmark + _currentStop;
 
                 //Move player back to make room for island to spawn, wait until player is done at the island
                 yield return StartCoroutine(WaitAndShowEvent(stop));
@@ -65,6 +82,9 @@ public class GameManager : MonoBehaviour
             landmark = Instantiate(landmarks[i], new Vector3(0, -400, 0),
                     Quaternion.identity, transform).GetComponent<OceanEvent>();
             currentEvent = landmark;
+            _currentLandmark = i;
+            progress = _currentLandmark + _currentStop;
+            
             yield return StartCoroutine(WaitAndShowEvent(landmark));
 
             yield return new WaitUntil(() => landmark.done);

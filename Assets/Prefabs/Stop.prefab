@@ -133,7 +133,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   eventName: Test Stop 1
   eventDesc: This island is a test.
+  difficulty: 0
   anim: {fileID: 0}
   eventType: 1
-  actionsList: 05000000
+  actionsList: 0200000005000000
   done: 0

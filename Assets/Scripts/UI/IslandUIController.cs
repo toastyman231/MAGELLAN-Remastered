@@ -9,7 +9,10 @@ namespace UI
     public class IslandUIController : MonoBehaviour
     {
         public static IslandUIController Instance;
-        
+
+        public static EventHandler<IslandArgs> CreateGUIEvent;
+        public static EventHandler HideGUIEvent;
+
         [SerializeField] private GameObject islandUI;
         [SerializeField] private Animator islandUIAnim;
 
@@ -28,9 +31,22 @@ namespace UI
             {
                 Destroy(this);
             }
+
+            CreateGUIEvent += DrawGUI;
+            HideGUIEvent += HideGUI;
         }
-        
-        public void SetupIsland(OceanEvent island)
+
+        public void InvokeDrawGUI(OceanEvent island)
+        {
+            CreateGUIEvent?.Invoke(this, new IslandArgs(island));
+        }
+
+        public void InvokeHideGUI()
+        {
+            HideGUIEvent?.Invoke(this, EventArgs.Empty);
+        }
+
+        private void DrawGUI(object sender, IslandArgs args)
         {
             //Show UI background
             islandUI.SetActive(true);
@@ -39,7 +55,7 @@ namespace UI
             //Populate name and buttons
             GameObject uiElements = islandUI.transform.GetChild(0).GetChild(0).gameObject;
 
-            uiElements.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = island.eventName.ToUpper();
+            uiElements.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = args.island.eventName.ToUpper();
             
             int i = 0;
             // Remove old buttons
@@ -51,12 +67,22 @@ namespace UI
             }
             
             // Create new buttons
-            foreach (OceanEvent.Actions action in island.actionsList)
+            foreach (OceanEvent.Actions action in args.island.actionsList)
             {
                 Button actionButton = Instantiate(buttonPrefab, uiElements.transform).GetComponent<Button>();
                 actionButton.gameObject.GetComponentInChildren<TextMeshProUGUI>().text = action.ToString();
-                actionButton.onClick.AddListener(island.GetAction(action));
+                actionButton.onClick.AddListener(args.island.GetAction(action));
             }
+        }
+
+        private void HideGUI(object sender, EventArgs args)
+        {
+            islandUIAnim.CrossFade(Furl, 0.0f, 0);
+        }
+        
+        public void SetupIsland(OceanEvent island)
+        {
+            InvokeDrawGUI(island);
 
             StartCoroutine(IntroDialogue(island));
         }
@@ -64,13 +90,23 @@ namespace UI
         public void LeaveIsland()
         {
             // Put closing dialogue here, before animation plays
-            islandUIAnim.CrossFade(Furl, 0.0f, 0);
+            InvokeHideGUI();
         }
 
         private IEnumerator IntroDialogue(OceanEvent island)
         {
             DialogueController.instance.AcceptInput("Welcome to " + island.eventName + "! " + island.eventDesc);
             yield return new WaitUntil(() => DialogueController.instance.textState == DialogueController.State.DONE);
+        }
+    }
+
+    public class IslandArgs : EventArgs
+    {
+        public OceanEvent island;
+
+        public IslandArgs(OceanEvent isl)
+        {
+            island = isl;
         }
     }
 }
