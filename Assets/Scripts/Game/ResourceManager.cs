@@ -10,6 +10,9 @@ public class ResourceManager : MonoBehaviour
     public static ResourceManager instance;
 
     public int storageMax;
+
+    public Item[] defaultItems;
+    public ArrayList items;
     
     private int _crew; 
     private int _crewMax;
@@ -68,6 +71,15 @@ public class ResourceManager : MonoBehaviour
             Destroy(this);
         }
 
+        items = new ArrayList();
+        defaultItems = new[]
+        {
+            new Item("Weapons", 100, 1),
+            new Item("Ammo", 100, 1),
+            new Item("Boards", 100, 1),
+            new Item("Spices", 100, 1)
+        };
+
         crew = 270;
         food = 36;
         gold = 1600;
@@ -121,7 +133,13 @@ public class Item
 {
     private string _name;
     private int _cost;
+    private int _modifier;
 
+    public int modifier
+    {
+        get => _modifier;
+        set => _modifier = value;
+    }
     public string name
     {
         get => _name;
@@ -134,9 +152,67 @@ public class Item
         set => _cost = value;
     }
 
+    // purchaseFunc should only give the player their item, gold handling is done in Purchase itself
+    public IEnumerator Purchase()
+    {
+        if (ResourceManager.instance.gold < cost)
+        {
+            DialogueController.instance.AcceptInput("Not enough gold for this item!");
+            yield return new WaitUntil(() => DialogueController.instance.textState == DialogueController.State.DONE);
+            yield break;
+        }
+
+        ResourceManager.instance.gold -= cost;
+        ResourceManager.instance.StartCoroutine(UpdateResources());
+    }
+
+    private IEnumerator UpdateResources()
+    {
+        int count = name.IndexOf(" ");
+        switch (name.Remove(0, count > 0 ? count + 1 : 0))
+        {
+            default:
+                // TODO: Check if there's room for this item
+                ResourceManager.instance.items.Add(this);
+                DialogueController.instance.AcceptInput("You purchased " + name + "!");
+                yield return new WaitUntil(() => DialogueController.instance.textState == DialogueController.State.DONE);
+                yield break;
+            case "Food":
+                if (ResourceManager.instance.food + modifier > ResourceManager.instance.foodMax)
+                {
+                    DialogueController.instance.AcceptInput("You don't have room for any more food!");
+                    yield return new WaitUntil(() => DialogueController.instance.textState == DialogueController.State.DONE);
+                    yield break;
+                }
+                ResourceManager.instance.food += modifier;
+                DialogueController.instance.AcceptInput("You purchased 1 Food!");
+                yield return new WaitUntil(() => DialogueController.instance.textState == DialogueController.State.DONE);
+                yield break;
+            case "Crew":
+                if (ResourceManager.instance.crew + modifier > ResourceManager.instance.crewMax)
+                {
+                    DialogueController.instance.AcceptInput("You don't have room for any more crew members!");
+                    yield return new WaitUntil(() => DialogueController.instance.textState == DialogueController.State.DONE);
+                    yield break;
+                }
+                ResourceManager.instance.crew += modifier;
+                DialogueController.instance.AcceptInput("You recruited 40 new crew members!");
+                yield return new WaitUntil(() => DialogueController.instance.textState == DialogueController.State.DONE);
+                yield break;
+        }
+    }
+
     public Item(string pName, int pCost)
     {
         name = pName;
         cost = pCost;
+        modifier = 1;
+    }
+    
+    public Item(string pName, int pCost, int pMod)
+    {
+        name = pName;
+        cost = pCost;
+        modifier = pMod;
     }
 }

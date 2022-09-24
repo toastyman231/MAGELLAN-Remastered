@@ -10,8 +10,10 @@ namespace UI
     {
         public static IslandUIController Instance;
 
-        public static EventHandler<IslandArgs> CreateGUIEvent;
-        public static EventHandler HideGUIEvent;
+        private static EventHandler<IslandArgs> CreateGUIEvent;
+        private static EventHandler HideGUIEvent;
+        private static EventHandler<TradeArgs> ShowTradeEvent;
+        private static EventHandler HideTradeEvent;
 
         [SerializeField] private GameObject islandUI;
         [SerializeField] private Animator islandUIAnim;
@@ -20,6 +22,8 @@ namespace UI
 
         private readonly int Unfurl = Animator.StringToHash("WideUnfurl");
         private readonly int Furl = Animator.StringToHash("WideFurl");
+        private readonly int HideUI = Animator.StringToHash("HideTrade");
+        private readonly int ShowUI = Animator.StringToHash("ShowTrade");
 
         private void Awake()
         {
@@ -34,6 +38,8 @@ namespace UI
 
             CreateGUIEvent += DrawGUI;
             HideGUIEvent += HideGUI;
+            ShowTradeEvent += ShowTrade;
+            HideTradeEvent += HideTrade;
         }
 
         public void InvokeDrawGUI(OceanEvent island)
@@ -44,6 +50,16 @@ namespace UI
         public void InvokeHideGUI()
         {
             HideGUIEvent?.Invoke(this, EventArgs.Empty);
+        }
+
+        public void InvokeShowTrade(Item[] items)
+        {
+            ShowTradeEvent?.Invoke(this, new TradeArgs(items));
+        }
+        
+        public void InvokeHideTrade()
+        {
+            HideTradeEvent?.Invoke(this, EventArgs.Empty);
         }
 
         private void DrawGUI(object sender, IslandArgs args)
@@ -79,6 +95,43 @@ namespace UI
         {
             islandUIAnim.CrossFade(Furl, 0.0f, 0);
         }
+
+        private void ShowTrade(object sender, TradeArgs args)
+        {
+            GameObject tradeButtonsParent = islandUI.transform.GetChild(0).GetChild(1).GetChild(1).gameObject;
+            int i = 0;
+            // Remove old buttons
+            foreach (Transform child in tradeButtonsParent.transform)
+            {
+                if (i != 0) { Destroy(child.gameObject); }
+
+                i++;
+            }
+            
+            // Create new buttons
+            foreach (Item item in args.items)
+            {
+                Button actionButton = Instantiate(buttonPrefab, tradeButtonsParent.transform).GetComponent<Button>();
+                if (item.name == "Leave")
+                {
+                    actionButton.gameObject.GetComponentInChildren<TextMeshProUGUI>().text = "Leave";
+                    actionButton.onClick.AddListener(() => Instance.InvokeHideTrade());
+                }
+                else
+                {
+                    actionButton.gameObject.GetComponentInChildren<TextMeshProUGUI>().text =
+                        item.name + ": " + item.cost + "G";
+                    actionButton.onClick.AddListener(() => StartCoroutine(item.Purchase()));
+                }
+            }
+
+            islandUIAnim.CrossFade(ShowUI, 0.0f, 0);
+        }
+
+        private void HideTrade(object sender, EventArgs args)
+        {
+            islandUIAnim.CrossFade(HideUI, 0.0f, 0);
+        }
         
         public void SetupIsland(OceanEvent island)
         {
@@ -107,6 +160,16 @@ namespace UI
         public IslandArgs(OceanEvent isl)
         {
             island = isl;
+        }
+    }
+
+    public class TradeArgs : EventArgs
+    {
+        public Item[] items;
+
+        public TradeArgs(Item[] _items)
+        {
+            items = _items;
         }
     }
 }

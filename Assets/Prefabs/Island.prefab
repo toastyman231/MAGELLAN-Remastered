@@ -131,9 +131,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6f3ded01b58f70b408165900d8074182, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  eventName: Landmark 1
-  eventDesc: This is the first test landmark.
+  eventName: Port Saint Julian
+  eventDesc: A town in the Spanish-controlled country of Argentina, Magellan considers
+    the natives here "uncivilized."
+  difficulty: 0
   anim: {fileID: 0}
   eventType: 0
-  actionsList: 05000000
+  actionsList: 
   done: 0

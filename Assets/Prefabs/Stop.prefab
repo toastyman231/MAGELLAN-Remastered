@@ -136,5 +136,5 @@ MonoBehaviour:
   difficulty: 0
   anim: {fileID: 0}
   eventType: 1
-  actionsList: 0200000005000000
+  actionsList: 
   done: 0

@@ -38,8 +38,13 @@ public class OceanEvent : MonoBehaviour
 
         if(actionsList.Length == 0 || actionsList == null)
         {
-            actionsList = new Actions[1];
-            actionsList[0] = Actions.LEAVE;
+            if (eventType == Type.LANDMARK || eventType == Type.ISLAND)
+            {
+                actionsList = new[]
+                {
+                    Actions.TRADE, Actions.RECRUIT, Actions.PILLAGE, Actions.LEAVE
+                };
+            }
         }
     }
 
@@ -81,7 +86,10 @@ public class OceanEvent : MonoBehaviour
                 // Return trade function
                 // Trade increases trust (difficulty)
                 // Trading spices (item) increases trust greatly
-                return () => Debug.Log("Trade");
+                return () =>
+                {
+                    StartCoroutine(Trade());
+                };
             case Actions.RECRUIT:
                 // Return recruit function
                 return () =>
@@ -91,7 +99,12 @@ public class OceanEvent : MonoBehaviour
                 };
             case Actions.PILLAGE:
                 // Return pillage function
-                return () => Debug.Log("Pillage");
+                // TODO: Replace this with a pillage minigame later
+                return () =>
+                {
+                    IslandUIController.Instance.InvokeHideGUI();
+                    StartCoroutine(Pillage());
+                };
             default:
                 return () => Debug.Log("Invalid Action type");
         }
@@ -153,6 +166,20 @@ public class OceanEvent : MonoBehaviour
         IslandUIController.Instance.InvokeDrawGUI(this);
     }
 
+    private IEnumerator Pillage()
+    {
+        DialogueController.instance.AcceptInput("You ready your crew to take this island for all it's worth!", true);
+        yield return new WaitUntil(() => DialogueController.instance.textState == DialogueController.State.DONE);
+
+        yield return StartCoroutine(Battle(difficulty + ResourceManager.instance.crew / 300 * 5, true));
+        
+        DialogueController.instance.AcceptInput("The people of this island will never trust you now...");
+        yield return new WaitUntil(() => DialogueController.instance.textState == DialogueController.State.DONE);
+        difficulty = 0;
+        
+        IslandUIController.Instance.InvokeDrawGUI(this);
+    }
+
     private IEnumerator Battle(float battleDiff, bool more = false, int minDifficulty = 30, string enemy = "the natives")
     {
         DialogueController.instance.AcceptInput("A battle breaks out between your crew and " + enemy + "!", true);
@@ -180,6 +207,26 @@ public class OceanEvent : MonoBehaviour
             DialogueController.instance.AcceptInput("You now have " + ResourceManager.instance.crew + " crew!", more);
             yield return new WaitUntil(() => DialogueController.instance.textState == DialogueController.State.DONE);
         }
+    }
+
+    private IEnumerator Trade()
+    {
+        if (difficulty <= 0)
+        {
+            DialogueController.instance.AcceptInput("The inhabitants of this island do not trust you enough to trade with you!");
+            yield return new WaitUntil(() => DialogueController.instance.textState == DialogueController.State.DONE);
+            yield break;
+        }
+
+        int chance = Random.Range(0, 4);
+        Item[] items = {
+            new("1 Food", 100),
+            new("40 Crew", 2000, 40),
+            ResourceManager.instance.defaultItems[chance],
+            new("Leave", 0)
+        };
+        
+        IslandUIController.Instance.InvokeShowTrade(items);
     }
 
     public void RunSetup()
