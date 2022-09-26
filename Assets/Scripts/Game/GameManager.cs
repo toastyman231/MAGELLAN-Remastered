@@ -1,9 +1,11 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using UI;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class GameManager : MonoBehaviour
 {
@@ -17,8 +19,10 @@ public class GameManager : MonoBehaviour
     public int[] stops;
     public int progress;
 
-    //public bool done;
+    public bool gameOver;
     public bool gameStarted;
+
+    public static EventHandler<FadeArgs> GameOverEventHandler;
 
     private int _maxDifficulty;
     private int _currentStop;
@@ -41,10 +45,16 @@ public class GameManager : MonoBehaviour
         }
         
         gameStarted = false;
+        gameOver = false;
         _maxDifficulty = 100;
         //TODO: Load these from player save
         _currentStop = 0;
         _currentLandmark = 0;
+    }
+
+    public void InvokeGameOver(bool fadeIn, float time, bool gameOver)
+    {
+        GameOverEventHandler?.Invoke(this, new FadeArgs(fadeIn, time, gameOver));
     }
 
     public IEnumerator StartGame()
@@ -94,15 +104,85 @@ public class GameManager : MonoBehaviour
                     Vector3.Distance(Ship.instance.transform.position, Ship.instance.targets[0]) <= 0.3f);
             yield return new WaitForSeconds(3f);
         }
+        
+        DialogueController.instance.AcceptInput("Nearly 3 years after their departure, Magellan's crew have finally made it back to Spain!", true);
+        yield return new WaitUntil(() => DialogueController.instance.textState == DialogueController.State.DONE);
+        DialogueController.instance.AcceptInput("As their numbers dwindled, they abandoned one ship, and another was captured by the Portuguese, leaving " +
+                                                "only one ship remaining out of the original 3 by the time the crew docks at Seville, Spain.", true);
+        yield return new WaitUntil(() => DialogueController.instance.textState == DialogueController.State.DONE);
+        StartCoroutine(EndGame());
     }
 
-    public IEnumerator WaitAndShowEvent(OceanEvent island)
+    private IEnumerator WaitAndShowEvent(OceanEvent island)
     {
         Ship.instance.shipState = Ship.State.DOCKING;
         yield return new WaitUntil(() => 
             Vector3.Distance(Ship.instance.transform.position, Ship.instance.targets[1]) <= 0.3f);
         
         island.InitiateEvent();
+    }
+
+    public IEnumerator EndGame()
+    {
+        if (ResourceManager.instance.crew >= ResourceManager.instance.startingCrew)
+        {
+            DialogueController.instance.AcceptInput("Out of the " + ResourceManager.instance.startingCrew + " crew members that left Spain, " +
+                                                    "you made it back with " + ResourceManager.instance.crew + "!");
+            yield return new WaitUntil(() => DialogueController.instance.textState == DialogueController.State.DONE);
+        }
+        else
+        {
+            DialogueController.instance.AcceptInput("Out of the " + ResourceManager.instance.startingCrew + " crew members that left Spain, " +
+                                                    (ResourceManager.instance.crew <= 0 ? 
+                                                        "none have made it back." : 
+                                                        "only " + ResourceManager.instance.crew + " have returned."), true);
+            yield return new WaitUntil(() => DialogueController.instance.textState == DialogueController.State.DONE);
+        }
+
+        int score = ResourceManager.instance.crew + ResourceManager.instance.gold; // TODO: Divide by time taken and adjust score categories
+
+        switch (score)
+        {
+            case >= 1000:
+                DialogueController.instance.AcceptInput("Your score was " + score + "! You stand at the top of the Spanish Naval world!", true);
+                yield return new WaitUntil(() => DialogueController.instance.textState == DialogueController.State.DONE);
+            
+                DialogueController.instance.AcceptInput("Your final rank is CAPTAIN GENERAL.");
+                yield return new WaitUntil(() => DialogueController.instance.textState == DialogueController.State.DONE);
+                break;
+            case >= 600:
+                DialogueController.instance.AcceptInput("Your score was " + score + "! " +
+                                                        "You did pretty well for yourself, but there's still more you could get out of this world.", true);
+                yield return new WaitUntil(() => DialogueController.instance.textState == DialogueController.State.DONE);
+            
+                DialogueController.instance.AcceptInput("Your final rank is ADMIRAL.");
+                yield return new WaitUntil(() => DialogueController.instance.textState == DialogueController.State.DONE);
+                break;
+            case >= 400:
+                DialogueController.instance.AcceptInput("Your score was " + score + "! Your name will certainly go down in history, but will you be famous" +
+                                                        " or infamous?", true);
+                yield return new WaitUntil(() => DialogueController.instance.textState == DialogueController.State.DONE);
+            
+                DialogueController.instance.AcceptInput("Your final rank is CAPTAIN.");
+                yield return new WaitUntil(() => DialogueController.instance.textState == DialogueController.State.DONE);
+                break;
+            case >= 200:
+                DialogueController.instance.AcceptInput("Your score was " + score + "! Perhaps you could have tried a bit harder...", true);
+                yield return new WaitUntil(() => DialogueController.instance.textState == DialogueController.State.DONE);
+            
+                DialogueController.instance.AcceptInput("Your final rank is FRIGATE LIEUTENANT.");
+                yield return new WaitUntil(() => DialogueController.instance.textState == DialogueController.State.DONE);
+                break;
+            default:
+                DialogueController.instance.AcceptInput("Your score was " + score + "! Surely there was more you could have done?", true);
+                yield return new WaitUntil(() => DialogueController.instance.textState == DialogueController.State.DONE);
+            
+                DialogueController.instance.AcceptInput("Your final rank is SEAMAN.");
+                yield return new WaitUntil(() => DialogueController.instance.textState == DialogueController.State.DONE);
+                break;
+        }
+        
+        instance.InvokeGameOver(true, 0.5f, true);
     }
     
     public void GameStarter()

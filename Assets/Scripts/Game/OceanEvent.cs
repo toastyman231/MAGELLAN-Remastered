@@ -38,7 +38,7 @@ public class OceanEvent : MonoBehaviour
 
         if(actionsList.Length == 0 || actionsList == null)
         {
-            if (eventType == Type.LANDMARK || eventType == Type.ISLAND)
+            if (eventType is Type.LANDMARK or Type.ISLAND)
             {
                 actionsList = new[]
                 {
@@ -48,10 +48,34 @@ public class OceanEvent : MonoBehaviour
         }
     }
 
+    private void ReduceCrewAndFood()
+    {
+        if (eventType == Type.LANDMARK || eventType == Type.ISLAND)
+        {
+            int foodNeeded = ResourceManager.instance.crew / 30;
+            if (foodNeeded <= ResourceManager.instance.food) 
+                ResourceManager.instance.food -= foodNeeded;
+            else
+            {
+
+                ResourceManager.instance.crew -= (foodNeeded - ResourceManager.instance.food) * 30;
+                ResourceManager.instance.food = 0;
+            }
+        }
+
+        if (ResourceManager.instance.crew <= 0)
+        {
+            StartCoroutine(GameManager.instance.EndGame());
+            GameManager.instance.gameOver = true;
+        }
+    }
+
     public void InitiateEvent()
     {
         //Ship.instance.shipState = Ship.State.DOCKING;
-        anim.CrossFade(Enter, 0.0f, 0);
+        ReduceCrewAndFood();
+        if (!GameManager.instance.gameOver)
+            anim.CrossFade(Enter, 0.0f, 0);
         //if (eventType != Type.ISLAND) difficulty += ResourceManager.instance.crew / 30 * 5;
     }
 
@@ -171,9 +195,16 @@ public class OceanEvent : MonoBehaviour
         DialogueController.instance.AcceptInput("You ready your crew to take this island for all it's worth!", true);
         yield return new WaitUntil(() => DialogueController.instance.textState == DialogueController.State.DONE);
 
-        yield return StartCoroutine(Battle(difficulty + ResourceManager.instance.crew / 300 * 5, true));
+        yield return StartCoroutine(Battle(difficulty + ResourceManager.instance.crew / 30 * 5, true));
+
+        int goldStolen = Random.Range(100, 301);
+        int foodStolen = Random.Range(0, 4);
+        DialogueController.instance.AcceptInput("You stole " + goldStolen + " gold and " + foodStolen + " food from the people of " + eventName + "!", true);
+        yield return new WaitUntil(() => DialogueController.instance.textState == DialogueController.State.DONE);
+        ResourceManager.instance.gold += goldStolen;
+        ResourceManager.instance.food += foodStolen;
         
-        DialogueController.instance.AcceptInput("The people of this island will never trust you now...");
+        DialogueController.instance.AcceptInput("The people of " + eventName + " will never trust you now...");
         yield return new WaitUntil(() => DialogueController.instance.textState == DialogueController.State.DONE);
         difficulty = 0;
         

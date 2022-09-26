@@ -29,16 +29,19 @@ public class BeginningCutsceneSetup : MonoBehaviour
             " 1 food each time you dock.", true);
         yield return new WaitUntil(() => DialogueController.instance.textState == DialogueController.State.DONE);
         DialogueController.instance.AcceptInput("Gold can be used to buy food at certain islands, but earning more will usually" +
-            " result in losing crewmembers, since you must pillage to earn gold!", true);
+            " result in losing crew members, since you must pillage to earn gold!", true);
         yield return new WaitUntil(() => DialogueController.instance.textState == DialogueController.State.DONE);
         DialogueController.instance.AcceptInput("If you find yourself desperately in need of crew, you could try recruiting" +
             " more, either with gold or by converting an island to Christianity and having them join you.", true);
         yield return new WaitUntil(() => DialogueController.instance.textState == DialogueController.State.DONE);
         DialogueController.instance.AcceptInput("However, beware: Doing this on islands that don't trust you may result in" +
-            " them kicking you out by force! This may result in losing crewmembers.", true);
+            " them kicking you out by force! This may result in losing crew members.", true);
         yield return new WaitUntil(() => DialogueController.instance.textState == DialogueController.State.DONE);
-        DialogueController.instance.AcceptInput("One last thing: Storing all that food takes space! The more food you bring," +
-            " the less room for crew you have, so the max crew you can have at a time will be lower.");
+        DialogueController.instance.AcceptInput("One last thing: The more crew you take, the less food you'll have room for, but you'll " +
+                                                "need more food to sustain that many crew.", true);
+        yield return new WaitUntil(() => DialogueController.instance.textState == DialogueController.State.DONE);
+        DialogueController.instance.AcceptInput("You can hold more crew than you have food to sustain, but you can't take more food than you have " +
+                                                "room for. Good luck!");
         yield return new WaitUntil(() => DialogueController.instance.textState == DialogueController.State.DONE);
 
         yield return new WaitForSeconds(0.1f);

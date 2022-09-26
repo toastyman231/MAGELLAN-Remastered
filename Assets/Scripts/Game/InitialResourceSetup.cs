@@ -22,7 +22,8 @@ public class InitialResourceSetup : MonoBehaviour
 
     public void Done()
     {
-        ResourceManager.instance.InitializeValues(ResourceManager.instance.crewMax, ResourceManager.instance.gold, ResourceManager.instance.food);
+        ResourceManager.instance.InitializeValues(ResourceManager.instance.crewMax, ResourceManager.instance.gold, ResourceManager.instance.foodMax);
+        ResourceManager.instance.startingCrew = ResourceManager.instance.crew;
         // Debug.Log("Crew: " + ResourceManager.instance.crew);
         // Debug.Log("CrewMax: " + ResourceManager.instance.crewMax);
         // Debug.Log("Food: " + ResourceManager.instance.food);

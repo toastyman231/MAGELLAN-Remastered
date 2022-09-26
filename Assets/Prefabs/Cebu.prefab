@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 4207951355152694243}
   - component: {fileID: 2593776454082733321}
   m_Layer: 0
-  m_Name: Island
+  m_Name: Cebu
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -131,9 +131,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6f3ded01b58f70b408165900d8074182, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  eventName: Port Saint Julian
-  eventDesc: A town in the Spanish-controlled country of Argentina, Magellan considers
-    the natives here "uncivilized."
+  eventName: Cebu
+  eventDesc: An island near Limasawa. Magellan and his crew approach in search of
+    food.
   difficulty: 0
   anim: {fileID: 0}
   eventType: 0

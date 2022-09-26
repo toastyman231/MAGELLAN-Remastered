@@ -10,6 +10,7 @@ public class ResourceManager : MonoBehaviour
     public static ResourceManager instance;
 
     public int storageMax;
+    public int startingCrew;
 
     public Item[] defaultItems;
     public ArrayList items;
@@ -55,7 +56,7 @@ public class ResourceManager : MonoBehaviour
         get => _food;
         set
         {
-            _food = value;
+            _food = value <= foodMax ? value : foodMax;
             RecalculateMaxes();
         }
     }
@@ -80,9 +81,9 @@ public class ResourceManager : MonoBehaviour
             new Item("Spices", 100, 1)
         };
 
-        crew = 270;
-        food = 36;
-        gold = 1600;
+        _crewMax = 270;
+        _foodMax = 36;
+        _gold = 300;
     }
 
     public void InitializeValues(int pCrew, int pGold, int pFood)

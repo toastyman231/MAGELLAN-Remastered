@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Playables;
 using Cinemachine;
+using UnityEngine.SceneManagement;
 
 public class MainMenu : MonoBehaviour
 {
@@ -35,7 +36,10 @@ public class MainMenu : MonoBehaviour
         StartCoroutine(geometry.LerpOverTime(geometry.lengthScale, 100f, 4, 0.3f));
     }
 
-    
+    public void ReturnToMenu()
+    {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+    }
 
     public void QuitGame()
     {
