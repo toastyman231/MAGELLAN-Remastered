@@ -8,6 +8,7 @@ using UnityEngine.SceneManagement;
 public class MainMenu : MonoBehaviour
 {
     public GameObject menu;
+    public GameObject credits;
     public Transform camNewLocation;
     public PlayableDirector newGameCutscene;
     public PlayableDirector continueCutscene;
@@ -39,6 +40,11 @@ public class MainMenu : MonoBehaviour
     public void ReturnToMenu()
     {
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+    }
+
+    public void ToggleCredits()
+    {
+        credits.SetActive(!credits.activeSelf);
     }
 
     public void QuitGame()

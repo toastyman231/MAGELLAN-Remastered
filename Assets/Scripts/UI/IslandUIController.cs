@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Security.Cryptography;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -99,13 +100,11 @@ namespace UI
         private void ShowTrade(object sender, TradeArgs args)
         {
             GameObject tradeButtonsParent = islandUI.transform.GetChild(0).GetChild(1).GetChild(1).gameObject;
-            int i = 0;
             // Remove old buttons
             foreach (Transform child in tradeButtonsParent.transform)
             {
-                if (i != 0) { Destroy(child.gameObject); }
+                Destroy(child.gameObject);
 
-                i++;
             }
             
             // Create new buttons

@@ -116,8 +116,9 @@ public class GameManager : MonoBehaviour
     private IEnumerator WaitAndShowEvent(OceanEvent island)
     {
         Ship.instance.shipState = Ship.State.DOCKING;
-        yield return new WaitUntil(() => 
-            Vector3.Distance(Ship.instance.transform.position, Ship.instance.targets[1]) <= 0.3f);
+        yield return new WaitForSeconds(1f); //Arbitrary wait time, might have to adjust if animations change
+        //yield return new WaitUntil(() => 
+        //    Vector3.Distance(Ship.instance.transform.position, Ship.instance.targets[1]) <= 0.3f);
         
         island.InitiateEvent();
     }
